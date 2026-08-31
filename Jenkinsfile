@@ -10,25 +10,33 @@ pipeline {
     stages {
         stage('build') {
             steps {
-                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                container('docker') {
+                    sh '''
+                        docker version
+                        docker build -t "$IMAGE_NAME:$IMAGE_TAG" .
+                    '''
+                }
             }
         }
 
         stage('push to registry') {
-            steps {
-                // do this below this comment to read from shell's environment variables
-                sh '''
-                    echo "$QUAY_CREDS_PSW" | docker login quay.io -u "$QUAY_CREDS_USR" --password-stdin
-                    docker push "$IMAGE_NAME:$IMAGE_TAG"
-                '''
+            container('docker') {
+                steps {
+                    // do this below this comment to read from shell's environment variables
+                    sh '''
+                        echo "$QUAY_CREDS_PSW" | docker login quay.io -u "$QUAY_CREDS_USR" --password-stdin
+                        docker push "$IMAGE_NAME:$IMAGE_TAG"
+                    '''
+                }
             }
         }
     }
 
     post {
         always {
-            sh "docker logout quay.io || true"
-            cleanWs()
+            container('docker') {
+                sh "docker logout quay.io || true"
+            }
         }
     }
 }
