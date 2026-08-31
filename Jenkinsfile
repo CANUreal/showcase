@@ -4,7 +4,7 @@ pipeline {
     environment {
         IMAGE_NAME = "quay.io/denizdayan/showcase"
         IMAGE_TAG = "${env.BUILD_NUMBER}"
-        QUAY_CREDS = credentials('quay-io-creds')
+        QUAY_CREDS = credentials('76e364a6-e3ea-4839-9c2d-7acff14df0a8')
     }
 
     stages {
