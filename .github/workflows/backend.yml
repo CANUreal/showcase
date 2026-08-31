@@ -26,9 +26,9 @@ jobs:
 
       - name: build docker image
         run: |
-          docker build --file Dockerfile --tag quay.io/denizdayan/showcase:latest .
+          docker build --file Dockerfile --tag quay.io/showcase/showcase:latest .
 
       - name: push docker image
         if: github.event_name == 'push'
-        run: docker push quay.io/denizdayan/showcase:latest
+        run: docker push quay.io/showcase/showcase:latest
         
