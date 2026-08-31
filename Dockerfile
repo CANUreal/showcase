@@ -16,6 +16,8 @@ FROM scratch
 
 COPY --from=builder /docker-gs-ping /docker-gs-ping
 
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+
 EXPOSE 8080
 
 ENTRYPOINT [ "/docker-gs-ping" ]
