@@ -1,29 +1,29 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
+	"showcase/middlewares"
+	"showcase/routes"
+	"time"
 )
 
 type Resp struct {
-	Status	int `json:"status"`
+	Status int `json:"status"`
 }
 
 func main() {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(200)
-		json.NewEncoder(w).Encode(Resp{
-			Status: 200,
-		})
-	})
+	mux.HandleFunc("GET /projects", routes.Projects)
+
+	handler := middlewares.LogMiddleware(mux)
 
 	server := http.Server{
-		Addr: ":8080",
-		Handler: mux,
+		Addr:         ":8080",
+		Handler:      handler,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 	log.Printf("Server started on :8080")
 	if err := server.ListenAndServe(); err != nil {
