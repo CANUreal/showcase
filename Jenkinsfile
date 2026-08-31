@@ -12,9 +12,14 @@ pipeline {
             steps {
                 container('docker') {
                     sh '''
-                        docker version
+                        for i in $(seq 1 30); do
+                            docker info >/dev/null 2>&1 && break
+                            sleep 1
+                        done
+
+                        docker info
                         docker build -t "$IMAGE_NAME:$IMAGE_TAG" .
-                    '''
+                    ''' 
                 }
             }
         }
