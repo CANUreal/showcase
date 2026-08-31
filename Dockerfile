@@ -12,12 +12,10 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /docker-gs-ping
 
 # second stage
 
-FROM alpine:latest
-
-WORKDIR /
+FROM scratch
 
 COPY --from=builder /docker-gs-ping /docker-gs-ping
 
 EXPOSE 8080
 
-CMD [ "/docker-gs-ping" ]
+ENTRYPOINT [ "/docker-gs-ping" ]
