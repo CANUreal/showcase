@@ -19,17 +19,17 @@ pipeline {
             }
         }
 
-        stage('push to registry') {
-            container('docker') {
-                steps {
-                    // do this below this comment to read from shell's environment variables
+        stage('Push to Registry') {
+            steps {
+                container('docker') {
                     sh '''
                         echo "$QUAY_CREDS_PSW" | docker login quay.io -u "$QUAY_CREDS_USR" --password-stdin
+
                         docker push "$IMAGE_NAME:$IMAGE_TAG"
                     '''
                 }
             }
-        }
+        }        
     }
 
     post {
