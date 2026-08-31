@@ -1,0 +1,11 @@
+controller:
+  serviceType: ClusterIP
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hostName: jenkins.local
+    path: "/"
+persistence:
+  # for now let's give it kubernetes' storageClass
+  storageClass: "local-path"
+  size: "8Gi"
