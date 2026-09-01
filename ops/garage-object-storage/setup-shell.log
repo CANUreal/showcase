@@ -1,0 +1,371 @@
+~/Projects/showcase/ops % mkdir garage-object-storage
+~/Projects/showcase/ops % cd garage-object-storage
+~/Projects/showcase/ops/garage-object-storage % ls
+~/Projects/showcase/ops/garage-object-storage % touch install.sh
+~/Projects/showcase/ops/garage-object-storage % ls
+ install.sh
+~/Projects/showcase/ops/garage-object-storage % nvim
+~/Projects/showcase/ops/garage-object-storage % ls
+ install.sh
+~/Projects/showcase/ops/garage-object-storage % touch values.override.yaml
+~/Projects/showcase/ops/garage-object-storage % ls
+ install.sh   values.override.yaml
+~/Projects/showcase/ops/garage-object-storage % nvim
+~/Projects/showcase/ops/garage-object-storage % nvim
+~/Projects/showcase/ops/garage-object-storage % kubectl get nodes -o wide
+NAME                    STATUS   ROLES           AGE   VERSION        INTERNAL-IP     EXTERNAL-IP   OS-IMAGE              KERNEL-VERSION            CONTAINER-RUNTIME
+localhost.localdomain   Ready    control-plane   24h   v1.36.4+k3s1   192.168.0.101   <none>        openSUSE Tumbleweed   7.1.8-1-default (amd64)   containerd://2.3.4-k3s1.36
+~/Projects/showcase/ops/garage-object-storage % kubectl get endpoints kubernetes
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME         ENDPOINTS            AGE
+kubernetes   192.168.0.101:6443   25h
+~/Projects/showcase/ops/garage-object-storage % kubectl get endpoint -n argocd
+error: the server doesn't have a resource type "endpoint"
+~/Projects/showcase/ops/garage-object-storage % kubectl get endpoint svc/argocd
+error: there is no need to specify a resource type as a separate argument when passing arguments in resource/name form (e.g. 'kubectl get resource/<resource_name>' instead of 'kubectl get resource resource/<resource_name>'
+~/Projects/showcase/ops/garage-object-storage % brarasasd
+zsh: command not found: brarasasd
+~/Projects/showcase/ops/garage-object-storage % nvim
+~/Projects/showcase/ops/garage-object-storage % kubectl get certificate -A
+error: the server doesn't have a resource type "certificate"
+~/Projects/showcase/ops/garage-object-storage % kubectl get clusterissuer
+error: the server doesn't have a resource type "clusterissuer"
+~/Projects/showcase/ops/garage-object-storage % kubectl get api.kubernetes.io/certificate -A
+error: the server doesn't have a resource type "api" in group "kubernetes.io"
+~/Projects/showcase/ops/garage-object-storage % nvim
+~/Projects/showcase/ops/garage-object-storage % cat values.override.yaml
+garage:
+  # 3 replicationfactor is ok for data safety
+  replicationFactor: 3
+
+deployment:
+  replicaCount: 3
+
+# local-path comes built in to k3s which in using
+persistence:
+  meta:
+    storageClass: "local-path"
+    size: 1Gi
+  data:
+    storageClass: "local-path"
+    size: 50Gi
+
+ingress:
+  s3:
+    api:
+      enabled: true
+      className: "traefik"
+      hosts:
+        - host: s3-api.garage.local
+          paths:
+            - path: /
+              pathType: Prefix
+
+~/Projects/showcase/ops/garage-object-storage % nvim
+~/Projects/showcase/ops/garage-object-storage % kubectl get svc -n kube-system traefik
+NAME      TYPE           CLUSTER-IP     EXTERNAL-IP     PORT(S)                      AGE
+traefik   LoadBalancer   10.43.204.38   192.168.0.101   80:31040/TCP,443:31228/TCP   24h
+~/Projects/showcase/ops/garage-object-storage % ls
+ install.sh   values.override.yaml
+~/Projects/showcase/ops/garage-object-storage % chmod +x install.sh
+~/Projects/showcase/ops/garage-object-storage % cat install.sh
+#!/bin/bash
+
+set -e
+
+
+required_commands=("kubectl" "git" "helm")
+
+for cmd in "${required_commands[@]}"; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        echo "error: $cmd is not installed"
+        echo "go install $cmd before running the script."
+        exit 1
+    fi
+done
+
+echo "Dependencies are installed let's check if kubernetes is installed."
+if ! kubectl cluster-info >/dev/null 2>&1; then
+    echo "kubernetes cluster is not reachable"
+    exit 1
+fi
+echo "ok"
+
+CLONE_DIR="/tmp/garage-install"
+rm -rf "$CLONE_DIR"
+echo "cloning garage repo"
+git clone https://git.deuxfleurs.fr/Deuxfleurs/garage "$CLONE_DIR"
+echo "cloned."
+
+cd "$CLONE_DIR/script/helm"
+
+if [ ! -f values.override.yaml ]; then
+    echo "err: values.override.yaml is not found in $(pwd)"
+    exit 1
+fi
+
+echo "installing garage via helm"
+helm install --create-namespace --namespace garage garage ./garage -f values.override.yaml
+
+echo "waiting for pod to get ready"
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=garage -n garage --timeout=120s
+
+echo "pods are ready. garage nodes are up, but the cluster layout is NOT configured yet."
+echo "garage will not accept S3 traffic until a layout is assigned and applied."
+echo ""
+kubectl exec --stdin --tty -n garage garage-0 -- /garage status || true
+
+
+echo ""
+echo "----------------------------------------------------------------------"
+echo "MANUAL STEP REQUIRED:"
+echo "the cluster layout must be assigned per node and applied. This cannot"
+echo "be safely fully-automated here because it requires you to read the"
+echo "node IDs from 'garage status' above and decide capacity/zone per node."
+echo ""
+echo "example for each node (replace <node_id> and adjust -z/-c):"
+echo "  kubectl exec -n garage garage-0 -- /garage layout assign -z dc1 -c 100G <node_id>"
+echo ""
+echo "then review and apply:"
+echo "  kubectl exec -n garage garage-0 -- /garage layout show"
+echo "  kubectl exec -n garage garage-0 -- /garage layout apply --version <N>"
+echo "----------------------------------------------------------------------"
+echo "done. garage is installed but requires the layout step above before use."
+~/Projects/showcase/ops/garage-object-storage % cat values.override.yaml
+garage:
+  # 3 replicationfactor is ok for data safety
+  replicationFactor: 3
+
+deployment:
+  replicaCount: 3
+
+# local-path comes built in to k3s which in using
+persistence:
+  meta:
+    storageClass: "local-path"
+    size: 1Gi
+  data:
+    storageClass: "local-path"
+    size: 50Gi
+
+ingress:
+  s3:
+    api:
+      enabled: true
+      className: "traefik"
+      hosts:
+        - host: s3-api.garage.local
+          paths:
+            - path: /
+              pathType: Prefix
+
+~/Projects/showcase/ops/garage-object-storage % ls
+ install.sh   values.override.yaml
+~/Projects/showcase/ops/garage-object-storage % nvim install.sh
+~/Projects/showcase/ops/garage-object-storage % ls
+ install.sh   values.override.yaml
+~/Projects/showcase/ops/garage-object-storage % cat install.sh
+#!/bin/bash
+
+set -e
+
+
+required_commands=("kubectl" "git" "helm")
+for cmd in "${required_commands[@]}"; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        echo "error: $cmd is not installed"
+        echo "go install $cmd before running the script."
+        exit 1
+    fi
+done
+
+
+echo "Dependencies are installed let's check if kubernetes is installed."
+if ! kubectl cluster-info >/dev/null 2>&1; then
+    echo "kubernetes cluster is not reachable"
+    exit 1
+fi
+echo "ok"
+
+if [ ! -f values.override.yaml ]; then
+    echo "err: values.override.yaml is not found in $(pwd)"
+    exit 1
+fi
+VALUES_FILE_ABS="$(realpath values.override.yaml)"
+
+CLONE_DIR="/tmp/garage-install"
+rm -rf "$CLONE_DIR"
+echo "cloning garage repo"
+git clone https://git.deuxfleurs.fr/Deuxfleurs/garage "$CLONE_DIR"
+echo "cloned."
+cd "$CLONE_DIR/script/helm"
+
+echo "installing garage via helm"
+helm install --create-namespace --namespace garage garage ./garage -f "$VALUES_FILE_ABS"
+
+echo "waiting for pod to get ready"
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=garage -n garage --timeout=120s
+echo "pods are ready. garage nodes are up, but the cluster layout is NOT configured yet."
+echo "garage will not accept S3 traffic until a layout is assigned and applied."
+echo ""
+kubectl exec --stdin --tty -n garage garage-0 -- /garage status || true
+echo ""
+echo "----------------------------------------------------------------------"
+echo "MANUAL STEP REQUIRED:"
+echo "the cluster layout must be assigned per node and applied. This cannot"
+echo "be safely fully-automated here because it requires you to read the"
+echo "node IDs from 'garage status' above and decide capacity/zone per node."
+echo ""
+echo "example for each node (replace <node_id> and adjust -z/-c):"
+echo "  kubectl exec -n garage garage-0 -- /garage layout assign -z dc1 -c 100G <node_id>"
+echo ""
+echo "then review and apply:"
+echo "  kubectl exec -n garage garage-0 -- /garage layout show"
+echo "  kubectl exec -n garage garage-0 -- /garage layout apply --version <N>"
+echo "----------------------------------------------------------------------"
+echo "done. garage is installed but requires the layout step above before use."
+~/Projects/showcase/ops/garage-object-storage % cat values.override.yaml
+garage:
+  # 3 replicationfactor is ok for data safety
+  replicationFactor: 3
+
+deployment:
+  replicaCount: 3
+
+# local-path comes built in to k3s which in using
+persistence:
+  meta:
+    storageClass: "local-path"
+    size: 1Gi
+  data:
+    storageClass: "local-path"
+    size: 50Gi
+
+ingress:
+  s3:
+    api:
+      enabled: true
+      className: "traefik"
+      hosts:
+        - host: s3-api.garage.local
+          paths:
+            - path: /
+              pathType: Prefix
+
+~/Projects/showcase/ops/garage-object-storage % ./install.sh
+Dependencies are installed let's check if kubernetes is installed.
+ok
+cloning garage repo
+Cloning into '/tmp/garage-install'...
+remote: Enumerating objects: 25174, done.
+remote: Counting objects: 100% (6133/6133), done.
+remote: Compressing objects: 100% (922/922), done.
+remote: Total 25174 (delta 5812), reused 5212 (delta 5211), pack-reused 19041 (from 1)
+Receiving objects: 100% (25174/25174), 45.00 MiB | 1.36 MiB/s, done.
+Resolving deltas: 100% (18937/18937), done.
+cloned.
+installing garage via helm
+NAME: garage
+LAST DEPLOYED: Tue Sep  1 16:00:43 2026
+NAMESPACE: garage
+STATUS: deployed
+REVISION: 1
+DESCRIPTION: Install complete
+TEST SUITE: None
+waiting for pod to get ready
+error: no matching resources found
+~/Projects/showcase/ops/garage-object-storage % holy shit
+zsh: command not found: holy
+~/Projects/showcase/ops/garage-object-storage % kubectl get pods -n garage
+NAME       READY   STATUS            RESTARTS   AGE
+garage-0   0/1     PodInitializing   0          17s
+~/Projects/showcase/ops/garage-object-storage % kubectl get pods -n garage --show-labels
+NAME       READY   STATUS     RESTARTS   AGE   LABELS
+garage-0   1/1     Running    0          43s   app.kubernetes.io/instance=garage,app.kubernetes.io/managed-by=Helm,app.kubernetes.io/name=garage,app.kubernetes.io/version=v2.3.0,apps.kubernetes.io/pod-index=0,controller-revision-hash=garage-548456f8ff,helm.sh/chart=garage-0.9.3,statefulset.kubernetes.io/pod-name=garage-0
+garage-1   1/1     Running    0          8s    app.kubernetes.io/instance=garage,app.kubernetes.io/managed-by=Helm,app.kubernetes.io/name=garage,app.kubernetes.io/version=v2.3.0,apps.kubernetes.io/pod-index=1,controller-revision-hash=garage-548456f8ff,helm.sh/chart=garage-0.9.3,statefulset.kubernetes.io/pod-name=garage-1
+garage-2   0/1     Init:0/1   0          4s    app.kubernetes.io/instance=garage,app.kubernetes.io/managed-by=Helm,app.kubernetes.io/name=garage,app.kubernetes.io/version=v2.3.0,apps.kubernetes.io/pod-index=2,controller-revision-hash=garage-548456f8ff,helm.sh/chart=garage-0.9.3,statefulset.kubernetes.io/pod-name=garage-2
+~/Projects/showcase/ops/garage-object-storage % kubectl exec --stdin --tty -n garage garage-0 -- /garage status
+Defaulted container "garage" out of: garage, garage-init (init)
+2026-09-01T13:02:26.416141Z  INFO garage_net::netapp: Connected to 127.0.0.1:3901, negotiating handshake...
+2026-09-01T13:02:26.456842Z  INFO garage_net::netapp: Connection established to f66a0d9eee23c996
+==== HEALTHY NODES ====
+ID                Hostname  Address           Tags  Zone  Capacity          DataAvail  Version
+4f02f99a8d2172f1  garage-2  10.42.0.148:3901              NO ROLE ASSIGNED             v2.3.0
+cdd39373f66847f7  garage-1  10.42.0.145:3901              NO ROLE ASSIGNED             v2.3.0
+f66a0d9eee23c996  garage-0  10.42.0.142:3901              NO ROLE ASSIGNED             v2.3.0
+~/Projects/showcase/ops/garage-object-storage % nvim install.sh
+~/Projects/showcase/ops/garage-object-storage % kubectl exec -n garage garage-0 -- /garage layout assign -z dc1 -c 50G f66a0d9eee23c996
+Defaulted container "garage" out of: garage, garage-init (init)
+2026-09-01T13:09:32.323048Z  INFO garage_net::netapp: Connected to 127.0.0.1:3901, negotiating handshake...
+2026-09-01T13:09:32.363851Z  INFO garage_net::netapp: Connection established to f66a0d9eee23c996
+Role changes are staged but not yet committed.
+Use `garage layout show` to view staged role changes,
+and `garage layout apply` to enact staged changes.
+~/Projects/showcase/ops/garage-object-storage % kubectl exec -n garage garage-0 -- bash
+Defaulted container "garage" out of: garage, garage-init (init)
+error: Internal error occurred: Internal error occurred: error executing command in container: failed to exec in container: failed to start exec "f0c92083f26884c437f9ae71f47f176b530270051cb3e266a4fc6513643d8256": OCI runtime exec failed: exec failed: unable to start container process: exec: "bash": executable file not found in $PATH
+~/Projects/showcase/ops/garage-object-storage % kubectl exec -n garage garage-0 -- /bin/sh
+Defaulted container "garage" out of: garage, garage-init (init)
+error: Internal error occurred: Internal error occurred: error executing command in container: failed to exec in container: failed to start exec "1ecc9ec31a13f13d08a6c45a71d75077586485b1a5fd597880caf5ea2df55c16": OCI runtime exec failed: exec failed: unable to start container process: exec: "/bin/sh": stat /bin/sh: no such file or directory
+~/Projects/showcase/ops/garage-object-storage % kubectl exec -n garage garage-0 -- /garage layout assign -z dc1 -c 50G cdd39373f66847f7
+Defaulted container "garage" out of: garage, garage-init (init)
+2026-09-01T13:10:47.409202Z  INFO garage_net::netapp: Connected to 127.0.0.1:3901, negotiating handshake...
+2026-09-01T13:10:47.449860Z  INFO garage_net::netapp: Connection established to f66a0d9eee23c996
+Role changes are staged but not yet committed.
+Use `garage layout show` to view staged role changes,
+and `garage layout apply` to enact staged changes.
+~/Projects/showcase/ops/garage-object-storage % kubectl exec -n garage garage-0 -- /garage layout assign -z dc1 -c 50G 4f02f99a8d2172f1
+Defaulted container "garage" out of: garage, garage-init (init)
+2026-09-01T13:10:55.983559Z  INFO garage_net::netapp: Connected to 127.0.0.1:3901, negotiating handshake...
+2026-09-01T13:10:56.024840Z  INFO garage_net::netapp: Connection established to f66a0d9eee23c996
+Role changes are staged but not yet committed.
+Use `garage layout show` to view staged role changes,
+and `garage layout apply` to enact staged changes.
+~/Projects/showcase/ops/garage-object-storage % kubectl exec -n garage garage-0 -- /garage layout show
+Defaulted container "garage" out of: garage, garage-init (init)
+2026-09-01T13:11:09.409872Z  INFO garage_net::netapp: Connected to 127.0.0.1:3901, negotiating handshake...
+2026-09-01T13:11:09.451840Z  INFO garage_net::netapp: Connection established to f66a0d9eee23c996
+==== CURRENT CLUSTER LAYOUT ====
+No nodes currently have a role in the cluster.
+See `garage status` to view available nodes.
+
+Current cluster layout version: 0
+
+==== STAGED ROLE CHANGES ====
+ID                Tags  Zone  Capacity
+4f02f99a8d2172f1  []    dc1   46.6 GiB
+cdd39373f66847f7  []    dc1   46.6 GiB
+f66a0d9eee23c996  []    dc1   46.6 GiB
+
+
+==== NEW CLUSTER LAYOUT AFTER APPLYING CHANGES ====
+ID                Tags  Zone  Capacity  Usable capacity
+4f02f99a8d2172f1  []    dc1   46.6 GiB  46.6 GiB (100.0%)
+cdd39373f66847f7  []    dc1   46.6 GiB  46.6 GiB (100.0%)
+f66a0d9eee23c996  []    dc1   46.6 GiB  46.6 GiB (100.0%)
+
+Zone redundancy: maximum
+
+==== COMPUTATION OF A NEW PARTITION ASSIGNATION ====
+
+Partitions are replicated 3 times on at least 1 distinct zones.
+
+Optimal partition size:                     186.3 MiB
+Usable capacity / total cluster capacity:   139.7 GiB / 139.7 GiB (100.0 %)
+Effective capacity (replication factor 3):  46.6 GiB
+
+dc1                 Tags  Partitions        Capacity   Usable capacity
+  4f02f99a8d2172f1  []    256 (256 new)     46.6 GiB   46.6 GiB (100.0%)
+  cdd39373f66847f7  []    256 (256 new)     46.6 GiB   46.6 GiB (100.0%)
+  f66a0d9eee23c996  []    256 (256 new)     46.6 GiB   46.6 GiB (100.0%)
+  TOTAL                   768 (256 unique)  139.7 GiB  139.7 GiB (100.0%)
+
+
+To enact the staged role changes, type:
+
+    garage layout apply --version 1
+
+You can also revert all proposed changes with: garage layout revert
+~/Projects/showcase/ops/garage-object-storage % ls
+ install.sh   values.override.yaml
+~/Projects/showcase/ops/garage-object-storage % touch logs.log

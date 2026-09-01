@@ -1,0 +1,27 @@
+garage:
+  # 3 replicationfactor is ok for data safety
+  replicationFactor: 3
+
+deployment:
+  replicaCount: 3
+
+# local-path comes built in to k3s which in using
+persistence:
+  meta:
+    storageClass: "local-path"
+    size: 1Gi
+  data:
+    storageClass: "local-path"
+    size: 50Gi
+
+ingress:
+  s3:
+    api:
+      enabled: true
+      className: "traefik"
+      hosts:
+        - host: s3-api.garage.local 
+          paths:
+            - path: / 
+              pathType: Prefix
+      
