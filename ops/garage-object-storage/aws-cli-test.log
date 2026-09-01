@@ -1,0 +1,15 @@
+~/Projects/showcase % kubectl exec -n garage garage-0 -- /garage key list
+Defaulted container "garage" out of: garage, garage-init (init)
+2026-09-01T16:31:58.968885Z  INFO garage_net::netapp: Connected to 127.0.0.1:3901, negotiating handshake...
+2026-09-01T16:31:59.009368Z  INFO garage_net::netapp: Connection established to f66a0d9eee23c996
+ID                          Created     Name      Expiration
+GK5fa37397becb56e3e3be23ad  2026-09-01  showcase  never
+~/Projects/showcase % kubectl exec -n garage garage-0 -- /garage bucket list
+Defaulted container "garage" out of: garage, garage-init (init)
+2026-09-01T16:32:04.554864Z  INFO garage_net::netapp: Connected to 127.0.0.1:3901, negotiating handshake...
+2026-09-01T16:32:04.595383Z  INFO garage_net::netapp: Connection established to f66a0d9eee23c996
+ID                Created     Global aliases  Local aliases
+411582455f7ad1e0  2026-09-01  showcase
+~/Projects/showcase % aws s3 ls --endpoint-url http://s3-api.garage.local --region garage
+2026-09-01 18:37:59 showcase
+~/Projects/showcase %
