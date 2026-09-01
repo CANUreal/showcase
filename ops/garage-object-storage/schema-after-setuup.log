@@ -1,0 +1,36 @@
+~ % kubectl exec -it -n garage garage-0 -- /garage layout show
+Defaulted container "garage" out of: garage, garage-init (init)
+2026-09-01T15:33:43.763234Z  INFO garage_net::netapp: Connected to 127.0.0.1:3901, negotiating handshake...
+2026-09-01T15:33:43.804810Z  INFO garage_net::netapp: Connection established to f66a0d9eee23c996
+==== CURRENT CLUSTER LAYOUT ====
+ID                Tags  Zone  Capacity  Usable capacity
+4f02f99a8d2172f1  []    dc1   46.6 GiB  46.6 GiB (100.0%)
+cdd39373f66847f7  []    dc1   46.6 GiB  46.6 GiB (100.0%)
+f66a0d9eee23c996  []    dc1   46.6 GiB  46.6 GiB (100.0%)
+
+Zone redundancy: maximum
+
+Current cluster layout version: 1
+~ % kubectl get ingress -n garage
+NAME            CLASS     HOSTS                 ADDRESS         PORTS   AGE
+garage-s3-api   traefik   s3-api.garage.local   192.168.0.101   80      153m
+~ % kubectl get pods -n garage
+NAME       READY   STATUS    RESTARTS   AGE
+garage-0   1/1     Running   0          153m
+garage-1   1/1     Running   0          152m
+garage-2   1/1     Running   0          152m
+~ % bet!
+zsh: command not found: bet!
+~ % kubectl get svc -n garage
+NAME              TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)             AGE
+garage            ClusterIP   10.43.13.231   <none>        3900/TCP,3902/TCP   153m
+garage-headless   ClusterIP   None           <none>        3900/TCP,3902/TCP   153m
+~ % kubectl get pvc -n garage
+NAME            STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+data-garage-0   Bound    pvc-067e90cc-348f-4dc8-9003-d4b76d4d05be   50Gi       RWO            local-path     <unset>                 153m
+data-garage-1   Bound    pvc-f7bad8d7-2a0a-4ad7-85a2-6a7cc9de248d   50Gi       RWO            local-path     <unset>                 153m
+data-garage-2   Bound    pvc-cb9c714b-87bc-4d46-970d-5d20c6f7c68f   50Gi       RWO            local-path     <unset>                 153m
+meta-garage-0   Bound    pvc-59e8508f-06be-4a41-a22e-68ea10a629ab   1Gi        RWO            local-path     <unset>                 153m
+meta-garage-1   Bound    pvc-57839d2d-ef60-406f-8207-56afacf181fa   1Gi        RWO            local-path     <unset>                 153m
+meta-garage-2   Bound    pvc-7304fa91-9bf1-4e37-814d-57a164f97953   1Gi        RWO            local-path     <unset>                 153m
+~ %
