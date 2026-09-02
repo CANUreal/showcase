@@ -1,0 +1,41 @@
+showcase on † main
+‚ùØ kubectl logs -n showcase -l app=showcase-backend
+2026/09/02 17:40:40 can't load dotenv open .env: no such file or directory
+2026/09/02 17:40:40 Server started on :8080
+2026/09/02 17:41:20 2026-09-02 17:41:20.272564026 +0000 UTC m=+40.220164198, GET, map[Accept:[*/*] User-Agent:[curl/8.22.0]], /users
+2026/09/02 17:37:34 can't load dotenv open .env: no such file or directory
+2026/09/02 17:37:34 Server started on :8080
+2026/09/02 17:41:10 2026-09-02 17:41:10.71972808 +0000 UTC m=+216.605414560, GET, map[Accept:[*/*] User-Agent:[curl/8.22.0]], /projects
+2026/09/02 17:43:54 2026-09-02 17:43:54.073268567 +0000 UTC m=+379.958955047, POST, map[Accept:[*/*] Content-Length:[95] Content-Type:[application/json] User-Agent:[curl/8.22.0]], /users
+2026/09/02 17:53:13 2026-09-02 17:53:13.423810104 +0000 UTC m=+939.309496574, GET, map[Accept:[*/*] User-Agent:[curl/8.21.0]], /users
+2026/09/02 17:53:28 2026-09-02 17:53:28.653205273 +0000 UTC m=+954.538891743, GET, map[Accept:[*/*] User-Agent:[curl/8.21.0]], /users
+2026/09/02 17:55:51 2026-09-02 17:55:51.886981913 +0000 UTC m=+1097.772668393, GET, map[Accept:[*/*] User-Agent:[curl/8.21.0]], /users
+
+showcase on † main
+‚ùØ kubectl get endpoints -n showcase
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME               ENDPOINTS                           AGE
+showcase-backend   10.42.0.176:8080,10.42.0.177:8080   20m
+
+showcase on † main
+‚ùØ curl -X GET 10.42.0.176:8080/users | jq .
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+100    250 100    250   0      0 248.1k      0                              0
+[
+  {
+    "id": "0e7950ff-647c-4ba6-8d50-c5da6a196136",
+    "username": "deniz",
+    "email": "nobodyknows@gmail.com",
+    "profile_link": ""
+  },
+  {
+    "id": "61084725-3138-4b39-83c0-c9f53e9e8ee8",
+    "username": "testuser1788371034",
+    "email": "test1788371034@example.com",
+    "profile_link": ""
+  }
+]
+
+showcase on † main
+‚ùØ
