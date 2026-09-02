@@ -58,10 +58,11 @@ jobs:
         run: |
           kubectl create secret generic showcase-backend-secrets \
             --dry-run=client -o yaml \
+            --namespace showcase \
             --from-literal=AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
             --from-literal=AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
             --from-literal=DATABASE_URL=${{ secrets.DATABASE_URL }} | \
-            kubeseal --namespace showcase -o yaml > gitops/apps/showcase-backend/sealed-secret.yaml
+            kubeseal --controller-namespace kube-system --controller-name sealed-secrets-controller --namespace showcase --format yaml > gitops/apps/showcase-backend/sealed-secret.yaml
 
       - name: commit and push gitops change
         if: github.event_name == 'push'
