@@ -1,0 +1,42 @@
+
+showcase/ops/postgres on  main [!?]
+❯ curl -X POST http//localhost:8080/users -H "Content-Type: application/json" -d '{"username":"deniz","email":"dnzdyn2012@gmail.com","password":"password123"}'
+curl: (6) Could not resolve host: http
+
+showcase/ops/postgres on  main [!?]
+❯ curl -X POST http://localhost:8080/users -H "Content-Type: application/json" -d '{"username":"deniz","email":"dnzdyn2012@gmail.com","password":"password123"}'
+{"id":"0e7950ff-647c-4ba6-8d50-c5da6a196136","username":"deniz","email":"dnzdyn2012@gmail.com","profile_link":""}
+
+showcase/ops/postgres on  main [!?]
+❯ curl -c cookies.txt -X POST http://localhost:8080/auth/login -H "Content-Type: application/json" -d '{"username":"deniz","password":"password1234"}'
+invalid username or password
+
+showcase/ops/postgres on  main [!?]
+❯ curl -c cookies.txt -X POST http://localhost:8080/auth/login -H "Content-Type: application/json" -d '{"username":"deniz","password":"password123"}'
+
+showcase/ops/postgres on  main [!?]
+❯ curl http://localhost:8080/users
+[{"id":"0e7950ff-647c-4ba6-8d50-c5da6a196136","username":"deniz","email":"dnzdyn2012@gmail.com","profile_link":""}]
+
+showcase/ops/postgres on  main [!?]
+❯ curl -b cookies.txt -X PATCH http://localhost:8080/users/0e7950ff-647c-4ba6-8d50-c5da6a196136 -H "Content-Type: application/json"
+invalid request body
+
+showcase/ops/postgres on  main [!?]
+❯ curl -b cookies.txt -X PATCH http://localhost:8080/users/0e7950ff-647c-4ba6-8d50-c5da6a196136 -H "Content-Type: application/json" -d '{"email":"nobodyknows@gmail.com"}'
+{"id":"0e7950ff-647c-4ba6-8d50-c5da6a196136","username":"deniz","email":"nobodyknows@gmail.com","profile_link":""}
+
+showcase/ops/postgres on  main [!?]
+❯ # lets try it without cookies
+zsh: bad pattern: #
+
+showcase/ops/postgres on  main [!?]
+❮ curl -X PATCH http://localhost:8080/users/0e7950ff-647c-4ba6-8d50-c5da6a196136 -H "Content-Type: application/json" -d '{"email":"nobodyknows@gmail.com"}'
+not authenticated
+
+showcase/ops/postgres on  main [!?]
+❯ # see!
+zsh: bad pattern: #
+
+showcase/ops/postgres on  main [!?]
+❯

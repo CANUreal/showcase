@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/joho/godotenv"
 )
 
 func openEntClient() (*ent.Client, error) {
@@ -33,6 +34,10 @@ func openEntClient() (*ent.Client, error) {
 }
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Printf("can't load dotenv %v", err)
+	} 
+
 	ctx := context.Background()
 
 	entClient, err := openEntClient()
