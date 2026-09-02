@@ -25,10 +25,35 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
 
       - name: build docker image
+        if: github.event_name == 'push'
         run: |
-          docker build --file Dockerfile --tag quay.io/showcase/showcase:latest .
+          docker build --file Dockerfile --tag quay.io/showcase/showcase:${GITHUB_SHA} .
 
       - name: push docker image
         if: github.event_name == 'push'
-        run: docker push quay.io/showcase/showcase:latest
-        
+        run: docker push quay.io/showcase/showcase:${GITHUB_SHA}
+       
+      - name: checkout gitops repo
+        if: github.event_name == 'push'
+        uses: actions/checkout@v4
+        with:
+          repository: CANUreal/showcase-gitops
+          token: ${{ secrets.GITOPS_TOKEN }}
+          path: gitops
+
+      - name: update deployment image number
+        if: github.event_name == 'push'
+        run: |
+          sed -i "s#image: quay.io/showcase/showcase:.*#image: quay.io/showcase/showcase:${GITHUB_SHA}#g" gitops/apps/showcase-backend/deployment.yaml
+
+      - name: commit and push gitops change
+        if: github.event_name == 'push'
+        run: |
+          cd gitops
+
+          git config user.name "actions[bot]"
+          git config user.email "12332343+actions[bot]@users.noreply.github.com"
+
+          git add apps/showcase-backend/deployment.yaml
+          git commit -m "updated showcase-backend image to ${GITHUB_SHA}" || exit 0
+          git push
