@@ -45,25 +45,23 @@ jobs:
         if: github.event_name == 'push'
         run: |
           sed -i "s#image: quay.io/showcase/showcase:.*#image: quay.io/showcase/showcase:${GITHUB_SHA}#g" gitops/apps/showcase-backend/deployment.yaml
-      - name: create temp secret from .env
-        if: github.event_name == 'push'
-        run: |
-          kubectl create secret generic showcase-backend-secrets \
-            --from-env-file=backend/.env \
-            --dry-run=client -o yaml > temp-secret.yaml
-
+          
       - name: install kubeseal    
         if: github.event_name == 'push'
         run: |
           curl -L https://github.com/bitnami-labs/sealed-secrets/releases/latest/download/kubeseal-linux-amd64 -o kubeseal
           chmod +x kubeseal
           sudo mv kubeseal /usr/local/bin/
-          
-      - name: seal the secret 
+      
+      - name: seal secret using literals
         if: github.event_name == 'push'
         run: |
-          # DİKKAT: Çıktıyı DOĞRUDAN gitops klasörünün içine yaz!
-          kubeseal --namespace showcase -o yaml < temp-secret.yaml > gitops/apps/showcase-backend/sealed-secret.yaml
+          kubectl create secret generic showcase-backend-secrets \
+            --dry-run=client -o yaml \
+            --from-literal=AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
+            --from-literal=AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+            --from-literal=DATABASE_URL=${{ secrets.DATABASE_URL }} | \
+            kubeseal --namespace showcase -o yaml > gitops/apps/showcase-backend/sealed-secret.yaml
 
       - name: commit and push gitops change
         if: github.event_name == 'push'
@@ -73,9 +71,8 @@ jobs:
           git config user.name "actions[bot]"
           git config user.email "12332343+actions[bot]@users.noreply.github.com"
 
-          # HEM deployment.yaml HEM sealed-secret.yaml EKLE
           git add apps/showcase-backend/deployment.yaml
           git add apps/showcase-backend/sealed-secret.yaml
-          
+
           git commit -m "updated showcase-backend image to ${GITHUB_SHA} and sealed secret" || exit 0
           git push 
