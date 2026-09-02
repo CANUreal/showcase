@@ -49,7 +49,7 @@ jobs:
       - name: install kubeseal    
         if: github.event_name == 'push'
         run: |
-          curl -L https://github.com/bitnami-labs/sealed-secrets/releases/latest/download/kubeseal-linux-amd64 -o kubeseal
+          https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.39.1/kubeseal-0.39.1-linux-amd64
           chmod +x kubeseal
           sudo mv kubeseal /usr/local/bin/
       
