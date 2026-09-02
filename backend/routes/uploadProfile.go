@@ -7,29 +7,20 @@ import (
 	"showcase/ent"
 	"showcase/ent/schema"
 	storage "showcase/garage"
-
-	"github.com/google/uuid"
-) 
+	"showcase/middlewares"
+)
 
 const maxUploadSize = 5 << 20 // 5 megabytes
 
 type ProfileImageHandler struct {
-	Garage	*storage.GarageClient
-	Ent 	*ent.Client
+	Garage *storage.GarageClient
+	Ent    *ent.Client
 }
 
-func (h *ProfileImageHandler) uploadProfileRoute(w http.ResponseWriter, r *http.Request) {
-	// NOTICE !
-	// WHEN WE COMPLETE AUTH MIDDLEWARE
-	// WE WILL USE THE USERID FROM THERE
-	// DO NOT FORGET THIS
-	// WHEN WE COMPLETE IT DELETE THESE COMMENTS
-	// FOR NOW WE WILL TEST IT WITH QUERY PARAMS
-	
-	userIdStr := r.URL.Query().Get("user_id")
-	userId, err := uuid.Parse(userIdStr)
-	if err != nil {
-		http.Error(w, "invalid user_id", http.StatusBadRequest)
+func (h *ProfileImageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	userId, ok := middlewares.UserIDFromContext(r.Context())
+	if !ok {
+		http.Error(w, "not authenticated", http.StatusUnauthorized)
 		return
 	}
 
@@ -52,7 +43,7 @@ func (h *ProfileImageHandler) uploadProfileRoute(w http.ResponseWriter, r *http.
 		http.Error(w, "upload failed", http.StatusInternalServerError)
 		return
 	}
-	
+
 	key, err := h.Garage.UploadProfileImage(r.Context(), userId, file, contentType)
 	if err != nil {
 		log.Printf("garage upload error: %v", err)
@@ -66,10 +57,10 @@ func (h *ProfileImageHandler) uploadProfileRoute(w http.ResponseWriter, r *http.
 		http.Error(w, "failed to save profile link", http.StatusInternalServerError)
 		return
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{
 		"key": "key",
 		"url": schema.ProfileImageURL(key),
 	})
-} 
+}

@@ -32,15 +32,13 @@ func NewGarageClient(ctx context.Context) (*GarageClient, error) {
 		// even it is garage let's call it aws cuz its tuff :)
 	}
 
-	client, err := s3.NewFromConfig(cfg, func(o *s3.Options) {
+	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
 		o.BaseEndpoint = aws.String("http://s3-api.garage.local")
 		// i can change the endpoint when this really goes to aws
 		o.UsePathStyle = true
 	})
-	if err != nil {
-		return nil, fmt.Errorf("%v", err)
-	}
-	
+
+
 	return &GarageClient{
 		S3: client,
 		Bucket: "showcase",
