@@ -1,0 +1,29 @@
+garage:
+  replicationFactor: 3
+
+
+deployment:
+  replicaCount: 3
+
+persistence:
+  # metadata
+  meta:
+    # "local-path" pvc comes with k3s if yall don't have k3s you gotta write ur default pvc(PersistantVolumeClaim)
+    storageClass: "local-path"
+    size: 1Gi
+  # raw data
+  data:
+    storageClass: "local-path"
+    size: 50Gi
+
+ingress:
+  s3:
+    api:
+      enabled: true
+      className: "traefik"
+      hosts:
+        - host: s3-api.garage.local
+          paths:
+            - path: /
+              pathType: Prefix
+

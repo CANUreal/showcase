@@ -46,25 +46,7 @@ jobs:
         run: |
           sed -i "s#image: quay.io/showcase/showcase:.*#image: quay.io/showcase/showcase:${GITHUB_SHA}#g" gitops/apps/showcase-backend/deployment.yaml
           
-      - name: install kubeseal    
-        if: github.event_name == 'push'
-        run: |
-          curl -OL "https://github.com/bitnami/sealed-secrets/releases/download/v0.39.1/kubeseal-0.39.1-linux-amd64.tar.gz"
-          tar -xvzf kubeseal-0.39.1-linux-amd64.tar.gz kubeseal
-          sudo install -m 755 kubeseal /usr/local/bin/kubeseal
-
-      - name: seal secret using literals
-        if: github.event_name == 'push'
-        run: |
-          kubectl create secret generic showcase-backend-secrets \
-            --dry-run=client -o yaml \
-            --namespace showcase \
-            --from-literal=AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
-            --from-literal=AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
-            --from-literal=DATABASE_URL=${{ secrets.DATABASE_URL }} | \
-            kubeseal --cert ops/sealed-secrets-mandatory-to-have-to-deploy-the-app-in-the-cluster/cert.pem --namespace showcase --format yaml > gitops/apps/showcase-backend/sealed-secret.yaml
-
-      - name: commit and push gitops change
+            - name: commit and push gitops change
         if: github.event_name == 'push'
         run: |
           cd gitops
@@ -73,7 +55,6 @@ jobs:
           git config user.email "12332343+actions[bot]@users.noreply.github.com"
 
           git add apps/showcase-backend/deployment.yaml
-          git add apps/showcase-backend/sealed-secret.yaml
 
           git commit -m "updated showcase-backend image to ${GITHUB_SHA} and sealed secret" || exit 0
           git push 
