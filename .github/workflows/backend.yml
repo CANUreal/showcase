@@ -46,7 +46,6 @@ jobs:
         run: |
           sed -i "s#image: quay.io/showcase/showcase:.*#image: quay.io/showcase/showcase:${GITHUB_SHA}#g" gitops/apps/showcase-backend/deployment.yaml
           
-            - name: commit and push gitops change
         if: github.event_name == 'push'
         run: |
           cd gitops

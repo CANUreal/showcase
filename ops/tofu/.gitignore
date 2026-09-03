@@ -3,3 +3,4 @@ terraform.tfstate
 terraform.tfstate.backup
 *.tfvars
 .env
+.garage_s3_creds.json
