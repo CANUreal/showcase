@@ -54,7 +54,7 @@ jobs:
           git config user.name "actions[bot]"
           git config user.email "12332343+actions[bot]@users.noreply.github.com"
 
-          git add apps/showcase-backend/deployment.yaml
+          git add apps/showcase-backend/*.yaml
 
           git commit -m "updated showcase-backend image to ${GITHUB_SHA} and sealed secret" || exit 0
           git push 
