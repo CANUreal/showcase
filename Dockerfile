@@ -10,11 +10,15 @@ COPY backend/ ./
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /docker-gs-ping
 
+RUN CGO_ENABLED=0 GOOS=linux go build -o /migrate ./cmd/migrate
+
 # second stage
 
 FROM scratch
 
 COPY --from=builder /docker-gs-ping /docker-gs-ping
+
+COPY --from=builder /migrate /migrate
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 

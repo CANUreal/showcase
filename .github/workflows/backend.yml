@@ -44,7 +44,7 @@ jobs:
       - name: update deployment image number
         if: github.event_name == 'push'
         run: |
-          sed -i "s#image: quay.io/showcase/showcase:.*#image: quay.io/showcase/showcase:${GITHUB_SHA}#g" gitops/apps/showcase-backend/deployment.yaml
+          sed -i "s#image: quay.io/showcase/showcase:.*#image: quay.io/showcase/showcase:${GITHUB_SHA}#g" gitops/apps/showcase-backend/*.yaml
       
       - name: push to gitops repo          
         if: github.event_name == 'push'

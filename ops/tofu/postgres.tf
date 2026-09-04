@@ -21,7 +21,7 @@ resource "helm_release" "postgres" {
         value = "showcase"
     }
     set_sensitive {
-        name = "auth.postgresPassword"
+        name = "auth.password"
         value = random_password.postgres.result
     }
     set {
