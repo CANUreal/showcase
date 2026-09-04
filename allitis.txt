@@ -1,0 +1,79 @@
+showcase on � main took 4s
+❯ curl http://showcase.local/users
+[]
+
+showcase on � main took 5s
+❯  YES YES YES YES YES YES YES
+zsh: command not found: YES
+
+showcase on � main
+❯ curl -X POST http//localhost:8080/users -H "Content-Type: application/json" -d '{"username":"showcase","email":"showcase@tuta.io","password":"password123"}'
+curl: (6) Could not resolve host: http
+
+showcase on � main [✘]
+❯ curl -X POST http//showcase.local/users -H "Content-Type: application/json" -d '{"username":"showcase","email":"showcase@tuta.io","password":"password123"}'
+curl: (6) Could not resolve host: http
+
+showcase on � main [✘]
+❯ curl -X POST http://showcase.local/users -H "Content-Type: application/json" -d '{"username":"showcase","email":"showcase@tuta.io","password":"password123"}'
+{"id":"1395cef4-0148-4cda-9ccc-c964b576d984","username":"showcase","email":"showcase@tuta.io","profile_link":""}
+
+showcase on � main [✘] took 5s
+❯ ls
+ backend   Dockerfile   EXPLAIN.md   LICENSE   ops   seeonaction1.txt
+
+showcase on � main [✘]
+❯ curl -X POST http://showcase.local/auth/login -H "Content-Type: application/json" -d '{"email":"showcase@tuta.io","password":"password123"}'
+username and password are required
+
+showcase on � main [✘] took 5s
+❯ curl -X POST http://showcase.local/auth/login -H "Content-Type: application/json" -d '{"username":"showcase","password":"password123"}'
+
+showcase on � main [✘] took 5s
+❯ ls
+ backend   Dockerfile   EXPLAIN.md   LICENSE   ops   seeonaction1.txt
+
+showcase on � main [✘]
+❯ cookie?
+zsh: no matches found: cookie?
+
+showcase on � main [✘]
+❯ ls
+ backend   Dockerfile   EXPLAIN.md   LICENSE   ops   seeonaction1.txt
+
+showcase on � main [✘]
+❯ ls
+ backend   Dockerfile   EXPLAIN.md   LICENSE   ops   seeonaction1.txt
+
+showcase on � main [✘]
+❯ find . -type f -name "cookies.txt"
+
+showcase on � main [✘]
+❯ curl http://showcase.local/users
+[{"id":"1395cef4-0148-4cda-9ccc-c964b576d984","username":"showcase","email":"showcase@tuta.io","profile_link":""}]
+
+showcase on � main [✘] took 5s
+❯ kubectl get pods -n showcaes
+No resources found in showcaes namespace.
+
+showcase on � main [✘]
+❯ kubectl get pods -n showcase
+NAME                                READY   STATUS      RESTARTS   AGE
+showcase-backend-7f8d897695-nthzd   1/1     Running     0          6m47s
+showcase-backend-7f8d897695-x9b5b   1/1     Running     0          6m46s
+showcase-migrate-9qtb8              0/1     Completed   0          6m50s
+
+showcase on � main [✘]
+❯ kubectl logs -n showcase showcase-backend-7f8d897695-x9b5b
+2026/09/04 10:14:49 can't load dotenv open .env: no such file or directory
+2026/09/04 10:14:49 Server started on :8080
+2026/09/04 10:15:21 2026-09-04 10:15:21.283685892 +0000 UTC m=+31.301428048, GET, map[Accept:[*/*] Accept-Encoding:[gzip] User-Agent:[curl/8.21.0] X-Forwarded-For:[10.42.0.1] X-Forwarded-Host:[showcase.local] X-Forwarded-Port:[80] X-Forwarded-Proto:[http] X-Forwarded-Server:[traefik-59b7647586-d542s] X-Real-Ip:[10.42.0.1]], /users
+2026/09/04 10:18:21 2026-09-04 10:18:21.693720542 +0000 UTC m=+211.711462708, POST, map[Accept:[*/*] Accept-Encoding:[gzip] Content-Length:[53] Content-Type:[application/json] User-Agent:[curl/8.21.0] X-Forwarded-For:[10.42.0.1] X-Forwarded-Host:[showcase.local] X-Forwarded-Port:[80] X-Forwarded-Proto:[http] X-Forwarded-Server:[traefik-59b7647586-d542s] X-Real-Ip:[10.42.0.1]], /auth/login
+2026/09/04 10:20:49 2026-09-04 10:20:49.640973655 +0000 UTC m=+359.658715821, GET, map[Accept:[*/*] Accept-Encoding:[gzip] User-Agent:[curl/8.21.0] X-Forwarded-For:[10.42.0.1] X-Forwarded-Host:[showcase.local] X-Forwarded-Port:[80] X-Forwarded-Proto:[http] X-Forwarded-Server:[traefik-59b7647586-d542s] X-Real-Ip:[10.42.0.1]], /users
+
+showcase on � main [✘]
+❯ see
+zsh: command not found: see
+
+showcase on � main [✘]
+❯

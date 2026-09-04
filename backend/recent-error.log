@@ -1,2 +1,0 @@
-# showcase/garage
-garage/garage.go:35:17: assignment mismatch: 2 variables but s3.NewFromConfig returns 1 value
